@@ -21,3 +21,4 @@ https://www.kaggle.com/kumarajarshi/life-expectancy-who?select=Life+Expectancy+D
 * WHO_LifeBirth.json   Life Expectancy at birth indicator data from WHO.
 * WHO_Life60.json       Life Expectancy at age 60 data from WHO
 * WHO_country.json      WHO Country and region codes.
+* WHOAllData.csv   All WHO data in csv format.
