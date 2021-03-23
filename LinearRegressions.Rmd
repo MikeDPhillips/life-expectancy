@@ -1,0 +1,77 @@
+---
+title: "LinearRegressionAnalysis"
+author: "Michael Phillips"
+date: "3/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+
+* Aids is a huge predictor of low life expectancy in developing countries, but not at all in developed.
+
+* BMI is important in developing countries (lower BMI -> lower life expectancy) but not in developed. Adolescent thinness is associated with lower life in developed countries. This all is evidence that worldwide there is a much bigger problem with undernourishment than with obesity.
+
+* Schooling is important indicator for both sets, but extremely important for developing countries.
+
+
+## All Data
+
+First I grouped all data together from the kaggle dataset.
+
+```{r echo=FALSE}
+df_kaggle <- read.csv("Life_Expectancy_Data.csv", header = T, stringsAsFactors = T)
+model_all <- lm(data=df_kaggle, formula=Life.expectancy~Status + Alcohol+percentage.expenditure+BMI + 
+              GDP + HIV.AIDS + Diphtheria + thinness.5.9.years  + 
+              Income.composition.of.resources + Schooling)
+summary(model_all)
+par(mfrow=c(2,2))
+termplot(model_all)
+
+
+```
+
+From this it looks like HIV.AIDS, Schooling, and Income Composition are the biggest effects.
+
+Then I wanted to break it up into developed vs developing and see if
+any different trends.
+
+
+## Developed Countries
+
+```{r echo=FALSE}
+df_developed <- subset(df_kaggle, df_kaggle$Status=="Developed")
+model.developed <- lm(data=df_developed, formula=Life.expectancy~Alcohol+
+                        thinness..1.19.years + 
+                        Income.composition.of.resources + Schooling)
+summary(model.developed)
+par(mfrow=c(2,2))
+termplot(model.developed)
+
+
+```
+
+## Developing Countries
+
+```{r echo=FALSE}
+df_developing <- subset(df_kaggle, df_kaggle$Status=="Developing")
+model.developing <- lm(data=df_developing, formula=Life.expectancy~Alcohol+percentage.expenditure+BMI + 
+                         GDP +HIV.AIDS + Diphtheria + thinness.5.9.years  + 
+                         Income.composition.of.resources + Schooling)
+summary(model.developing)
+par(mfrow=c(2,2))
+termplot(model.developing)
+```
+
+
+## Takeaways
+
+* Aids is a huge predictor of low life expectancy in developing countries, but not at all in developed.
+
+* BMI is important in developing countries (lower BMI -> lower life expectancy) but not in developed. Adolescent thinness is associated with lower life in developed countries. This all is evidence that worldwide there is a much bigger problem with undernourishment than with obesity.
+
+* Schooling is important indicator for both sets, but extremely important for developing countries.
+
