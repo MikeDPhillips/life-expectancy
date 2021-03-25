@@ -45,7 +45,9 @@
         console.log(data.length)
 
 
-        data.sort( (a,b) =>  d3.descending(a['Region'],b['Region']));
+        data.sort( (a,b) =>
+                d3.descending(a['Region'],b['Region']) ||
+                d3.ascending(a['2016'], b['2016']));
 
         // X axis
         let xScale = d3.scaleBand()
