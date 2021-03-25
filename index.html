@@ -6,7 +6,12 @@
     <title>Project 1: Life Expectancy</title>
     <script src="https://d3js.org/d3.v6.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-
+<!--    <style>
+        .xAxis .tick text {
+            font-size: 28px;
+            text-anchor: middle;
+        }
+    </style>-->
 </head>
 
 <body>
@@ -22,7 +27,7 @@
 
 <script>
     let margin = {top:20,right:20,bottom:120,left:60},
-            width = 3800,
+            width = 1400,
             height = 1200,
             chartWidth = width - margin.left - margin.right,
             chartHeight = height - margin.top - margin.bottom;
@@ -40,30 +45,41 @@
         console.log(data[0]['2016']);
 
         console.log(data.length)
+
+        const group_key = 'Region2';
         data = data.filter( d => {
-            return d['Region'] != null })
+            return d[group_key ] != null && d[group_key] != "NA" })
         console.log(data.length)
 
 
         data.sort( (a,b) =>
-                d3.descending(a['Region'],b['Region']) ||
+                d3.descending(a[group_key ],b[group_key ]) ||
                 d3.ascending(a['2016'], b['2016']));
 
-        // X axis
-        let xScale = d3.scaleBand()
-                .domain(d3.map(data, d => d.Country))
-                .range([0, chartWidth])
-                .padding(0.05);
 
-       let bottomAxis = d3.axisBottom(xScale);
+        // X axis
+         let xScale = d3.scaleBand()
+                 .domain(d3.map(data, d => d.Country))
+                 .range([0, chartWidth])
+                 .padding(0.00)
+                 .paddingOuter(0.5);
+
+        let groups = d3.map(data, d => d[group_key ]);
+        console.log(groups);
+        let xGroups = d3.scaleBand()
+            .domain(groups)
+            .range([0, chartWidth])
+
+       let bottomAxis = d3.axisBottom(xGroups);
        annotations.append("g")
                .attr("class", "xAxis")
                .attr("transform",`translate(${margin.left},${chartHeight+margin.top})`)
                .call(bottomAxis)
                .selectAll("text")
-               .attr("transform", "translate(-10,0)rotate(-45)")
-               .style("text-anchor", "end")
-                .style("font-size", 8);
+               .attr("id", "xText")
+               .attr("transform", "translate(0,20)rotate(10)")
+               //.style("text-anchor", "end")
+
 
        // Y Axis
         let yScale = d3.scaleLinear()
@@ -91,7 +107,7 @@
 
         //Color scale
         const fillScale = d3.scaleOrdinal(d3.schemeSet2)
-                .domain(d3.map(data, d => d.Region))
+                .domain(d3.map(data, d => d[group_key]))
 
         //Add bars
         chartArea.selectAll("rect.bar").data(data)
@@ -104,7 +120,7 @@
             })
             enter.append("rect")
                 .attr("class", "bar")
-                    .attr("region", d => d['Region'])
+                    .attr("region", d => d[group_key])
                 .attr("x", d => xScale(d.Country) )
                 .attr("y", d => yScale(d['2016']))
                 .attr("width", xScale.bandwidth())
@@ -114,7 +130,7 @@
                     else
                         return(chartHeight - yScale(d['2016']));
                 })
-                .attr("fill", d => fillScale(d['Region']))
+                .attr("fill", d => fillScale(d[group_key]))
                 .on("mouseover", function () {
                     let r = d3.select(this);
                     console.log(r.attr("region"));});

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <title>Project 1: Life Expectancy</title>
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
+<!--    <style>
+        .xAxis .tick text {
+            font-size: 28px;
+            text-anchor: middle;
+        }
+    </style>-->
+</head>
+
+<body>
+
+<div id="main_header">
+<h2> Life Expectancy</h2>
+</div>
+
+<div class="header" id="g1_header">
+<svg id="g1">
+</svg>
+</div>
+
+<script>
+    let margin = {top:20,right:20,bottom:120,left:60},
+            width = 1400,
+            height = 1200,
+            chartWidth = width - margin.left - margin.right,
+            chartHeight = height - margin.top - margin.bottom;
+
+    let svg = d3.select("#g1")
+        .attr("width", width)
+        .attr("height", height)
+
+    let annotations = svg.append("g").attr("id","annotations");
+    let chartArea = svg.append("g").attr("id","points")
+            .attr("transform",`translate(${margin.left},${margin.top})`);
+
+
+    Promise.all( [
+            d3.csv('countrydata.csv', d3.autoType),
+            d3.json('world-110m.geojson')
+    ])
+    .then(([data, geomap]) => {
+
+        const group_key = 'Region2';
+        data = data.filter( d => {
+            return d[group_key ] != null && d[group_key] != "NA" })
+        console.log(data.length)
+
+
+        data.sort( (a,b) =>
+                d3.descending(a[group_key ],b[group_key ]) ||
+                d3.ascending(a['2016'], b['2016']));
+
+
+        // Map and projection
+        let path = d3.geoPath();
+        let projection = d3.geoNaturalEarth()
+                .scale(chartWidth / 1.3 / Math.PI)
+                .center([0, 20])
+                .translate([chartWidth / 2, chartHeight / 2]);
+
+// Data and color scale
+        let colorScale = d3.scaleThreshold()
+                .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
+                .range(d3.schemeBlues[7]);
+
+        console.log(geomap);
+        console.log(geomap.features);
+        svg.append("g")
+            .attr("id", "map")
+            .selectAll("path")
+            .data(geomap.features)
+            .enter().append("path")
+                .attr("fill", "#69b3a2")
+                .attr("stroke", "#fff")
+                .attr("d", path
+                        .projection(projection))
+
+
+
+
+    })
+
+</script>
+
+
+</body>
+</html>
