@@ -46,15 +46,15 @@
             d3.csv('countrydata.csv', d3.autoType),
             d3.json('world-110m.geojson')
     ])
-    .then(([data, geomap]) => {
+    .then(([pop, geomap]) => {
 
         const group_key = 'Region2';
-        data = data.filter( d => {
+        popa = pop.filter( d => {
             return d[group_key ] != null && d[group_key] != "NA" })
-        console.log(data.length)
+        //console.log(pop)
 
 
-        data.sort( (a,b) =>
+        pop.sort( (a,b) =>
                 d3.descending(a[group_key ],b[group_key ]) ||
                 d3.ascending(a['2016'], b['2016']));
 
@@ -67,26 +67,41 @@
                 .translate([chartWidth / 2, chartHeight / 2]);
 
 // Data and color scale
-        let colorScale = d3.scaleThreshold()
-                .domain([100000, 1000000, 10000000, 30000000, 100000000, 500000000])
-                .range(d3.schemeBlues[7]);
 
-        console.log(geomap);
-        console.log(geomap.features);
+        let colorScale = d3.scaleThreshold()
+                .domain([45,50,55,60,65,70,75,80])
+                .range(d3.schemeBlues[9]);
+
+
+/*
+        let colorScale = d3.scaleThreshold()
+                .domain([45,55,65,75,80])
+                .range(d3.schemeBlues[6]);
+*/
+
         svg.append("g")
             .attr("id", "map")
             .selectAll("path")
             .data(geomap.features)
             .enter().append("path")
-                .attr("fill", "#69b3a2")
                 .attr("stroke", "#fff")
-                .attr("d", path
-                        .projection(projection))
+                .attr("d", path .projection(projection))
+                .attr("fill", d => {
+                    d.final =  getLifeExp(pop, d.id, '2016') || 0;
+                    return colorScale(d.final);
+                })
+                .attr("exp", d => d.final)
+                .on("mouseover", function () {
+                    let r = d3.select(this);
+                    console.log(r.attr("exp"));});
 
+    });
 
-
-
-    })
+    function getLifeExp(data, id, year) {
+        let val = data.filter( d => d.Code === id);
+        if(val.length == 0) return null;
+        return val[0][year];
+    }
 
 </script>
 
