@@ -39,7 +39,13 @@
         console.log(data[0]);
         console.log(data[0]['2016']);
 
-        data.sort( (a,b) =>  d3.descending(a['2016'],b['2016']));
+        console.log(data.length)
+        data = data.filter( d => {
+            return d['Region'] != null })
+        console.log(data.length)
+
+
+        data.sort( (a,b) =>  d3.descending(a['Region'],b['Region']));
 
         // X axis
         let xScale = d3.scaleBand()
@@ -83,6 +89,7 @@
 
         //Color scale
         const fillScale = d3.scaleOrdinal(d3.schemeSet2)
+                .domain(d3.map(data, d => d.Region))
 
         //Add bars
         chartArea.selectAll("rect.bar").data(data)
@@ -95,6 +102,7 @@
             })
             enter.append("rect")
                 .attr("class", "bar")
+                    .attr("region", d => d['Region'])
                 .attr("x", d => xScale(d.Country) )
                 .attr("y", d => yScale(d['2016']))
                 .attr("width", xScale.bandwidth())
@@ -104,8 +112,12 @@
                     else
                         return(chartHeight - yScale(d['2016']));
                 })
-                .attr("fill", d => fillScale(d['Region']));
+                .attr("fill", d => fillScale(d['Region']))
+                .on("mouseover", function () {
+                    let r = d3.select(this);
+                    console.log(r.attr("region"));});
             },
+
             exit => {
                 exit.remove();
             }
