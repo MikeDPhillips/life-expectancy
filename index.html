@@ -59,10 +59,10 @@
 
        // Y Axis
         let yScale = d3.scaleLinear()
-            .domain([0, 90])
+            .domain([40, 90])
             .range([chartHeight, 0]);
-        let leftAxis = d3.axisLeft(yScale).ticks(20);
-        let leftGridLines = d3.axisLeft(yScale).ticks(20)
+        let leftAxis = d3.axisLeft(yScale).ticks(10);
+        let leftGridLines = d3.axisLeft(yScale).ticks(10)
                 .tickSize(-chartWidth).tickFormat("");
 
         annotations.append("g")
@@ -77,15 +77,18 @@
         annotations.append("g")
             .attr("class", "gridlines")
             .attr("transform","translate("+(margin.left)+","+(margin.top)+")")
+            .raise()
             .call(leftGridLines);
 
 
+        //Color scale
+        const fillScale = d3.scaleOrdinal(d3.schemeSet2)
 
         //Add bars
         chartArea.selectAll("rect.bar").data(data)
             .join(enter => {
                 console.log(d => {
-                    if(d['2018'] !== d['2018'])
+                    if(d['2016'] !== d['2016'])
                         return(0);
                     else
                         return(d['2016']);
@@ -96,12 +99,12 @@
                 .attr("y", d => yScale(d['2016']))
                 .attr("width", xScale.bandwidth())
                 .attr("height", d => {
-                    if(d['2018'] !== d['2018'])
+                    if(d['2016'] !== d['2016'])
                         return(yScale(0));
                     else
                         return(chartHeight - yScale(d['2016']));
                 })
-                .attr("fill", "darkblue")
+                .attr("fill", d => fillScale(d['Region']));
             },
             exit => {
                 exit.remove();
