@@ -5,6 +5,8 @@
 <head>
     <title>Project 1: Life Expectancy</title>
     <script src="https://d3js.org/d3.v6.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
+
 </head>
 
 <body>
@@ -13,10 +15,104 @@
 <h2> Life Expectancy</h2>
 </div>
 
-<div class="header" id="g1_header>
+<div class="header" id="g1_header">
 <svg id="g1">
 </svg>
 </div>
+
+<script>
+    let margin = {top:20,right:20,bottom:120,left:60},
+            width = 3800,
+            height = 1200,
+            chartWidth = width - margin.left - margin.right,
+            chartHeight = height - margin.top - margin.bottom;
+
+    let svg = d3.select("#g1")
+        .attr("width", width)
+        .attr("height", height)
+
+    let annotations = svg.append("g").attr("id","annotations");
+    let chartArea = svg.append("g").attr("id","points")
+            .attr("transform",`translate(${margin.left},${margin.top})`);
+
+    d3.csv("countrydata.csv", d3.autoType).then((data) => {
+        console.log(data[0]);
+        console.log(data[0]['2016']);
+
+        data.sort( (a,b) =>  d3.descending(a['2016'],b['2016']));
+
+        // X axis
+        let xScale = d3.scaleBand()
+                .domain(d3.map(data, d => d.Country))
+                .range([0, chartWidth])
+                .padding(0.05);
+
+       let bottomAxis = d3.axisBottom(xScale);
+       annotations.append("g")
+               .attr("class", "xAxis")
+               .attr("transform",`translate(${margin.left},${chartHeight+margin.top})`)
+               .call(bottomAxis)
+               .selectAll("text")
+               .attr("transform", "translate(-10,0)rotate(-45)")
+               .style("text-anchor", "end")
+                .style("font-size", 8);
+
+       // Y Axis
+        let yScale = d3.scaleLinear()
+            .domain([0, 90])
+            .range([chartHeight, 0]);
+        let leftAxis = d3.axisLeft(yScale).ticks(20);
+        let leftGridLines = d3.axisLeft(yScale).ticks(20)
+                .tickSize(-chartWidth).tickFormat("");
+
+        annotations.append("g")
+            .attr("class", "yAxis")
+            .attr("transform",`translate(${margin.left},${margin.top})`)
+            .call(leftAxis)
+            //.selectAll("text")
+            // .attr("transform", "translate(-10,0)rotate(-45)")
+            // .style("text-anchor", "end")
+            // .style("font-size", 8);
+
+        annotations.append("g")
+            .attr("class", "gridlines")
+            .attr("transform","translate("+(margin.left)+","+(margin.top)+")")
+            .call(leftGridLines);
+
+
+
+        //Add bars
+        chartArea.selectAll("rect.bar").data(data)
+            .join(enter => {
+                console.log(d => {
+                    if(d['2018'] !== d['2018'])
+                        return(0);
+                    else
+                        return(d['2016']);
+            })
+            enter.append("rect")
+                .attr("class", "bar")
+                .attr("x", d => xScale(d.Country) )
+                .attr("y", d => yScale(d['2016']))
+                .attr("width", xScale.bandwidth())
+                .attr("height", d => {
+                    if(d['2018'] !== d['2018'])
+                        return(yScale(0));
+                    else
+                        return(chartHeight - yScale(d['2016']));
+                })
+                .attr("fill", "darkblue")
+            },
+            exit => {
+                exit.remove();
+            }
+            );
+
+
+    })
+
+</script>
+
 
 </body>
 </html>
