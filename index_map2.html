@@ -6,7 +6,6 @@
     <title>Project 1: Life Expectancy</title>
     <script src="https://d3js.org/d3.v6.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-    <script type="module" src="appthatimports.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
 <!--    <style>
         .xAxis .tick text {
@@ -19,7 +18,7 @@
 <body>
 
 <div id="main_header">
-<h2> Life Expectancy</h2>
+<h2> Life Expectancy Change 1960-Present</h2>
 </div>
 
 <div class="header" id="g1_header">
@@ -28,6 +27,7 @@
 </div>
 
 <script>
+
 
     let margin = {top:20,right:20,bottom:120,left:60},
             width = 1400,
@@ -45,27 +45,17 @@
 
 
     Promise.all( [
-            d3.csv('countrydata.csv', d3.autoType),
+            d3.csv('simplified.csv', d3.autoType),
             d3.json('world-110m.geojson')
     ])
     .then(([pop, geomap]) => {
-
-        const group_key = 'Region2';
-        popa = pop.filter( d => {
-            return d[group_key ] != null && d[group_key] != "NA" })
-        //console.log(pop)
-
-
-        pop.sort( (a,b) =>
-                d3.descending(a[group_key ],b[group_key ]) ||
-                d3.ascending(a['2016'], b['2016']));
-
-
+        console.log(pop[0]);
         // Map and projection
         let path = d3.geoPath();
         let projection = d3.geoNaturalEarth2()
                 .scale(chartWidth / 1.4 / Math.PI)
                 .translate([chartWidth / 2, chartHeight / 2]);
+
 
 // Data and color scale
 
@@ -81,10 +71,12 @@
                 .range(d3.schemeBlues[6]);
 */
 
-        let lifeExtent = d3.extent(pop, d=>pop['2016']);
+        const y = 'change';
+        let lifeExtent = d3.extent(pop, d=>d[y]);
+        console.log(lifeExtent);
         let colorScale = d3.scaleQuantize()
-                .domain([40,90])
-                .range(d3.schemeBlues[9]);
+                .domain(lifeExtent)
+                .range(d3.schemeGreens[9]);
 
 
         svg.append("g")
@@ -95,18 +87,13 @@
                 .attr("stroke", "#fff")
                 .attr("d", path .projection(projection))
                 .attr("fill", d => {
-                    d.final =  getLifeExp(pop, d.id, '2016') || 0;
+                    d.final =  getLifeExp(pop, d.id, y) || 0;
                     return colorScale(d.final);
                 })
                 .attr("exp", d => d.final)
                 .on("mouseover", function () {
                     let r = d3.select(this);
                     console.log(r.attr("exp"));});
-
-
-       // const color = d3.scaleQuantile([1, 10], d3.schemeBlues[9])
-
-
 
 
 
