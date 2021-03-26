@@ -5,8 +5,8 @@
 <head>
     <title>Project 1: Life Expectancy</title>
     <script src="https://d3js.org/d3.v6.js"></script>
-    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-    <script type="module" src="appthatimports.js"></script>
+    <script src="d3-geo-projection.v2.min.js"></script>
+    <script src="d3-legend.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
 <!--    <style>
         .xAxis .tick text {
@@ -30,7 +30,7 @@
 <script>
 
     let margin = {top:20,right:20,bottom:120,left:60},
-            width = 1400,
+            width = 1200,
             height = 1200,
             chartWidth = width - margin.left - margin.right,
             chartHeight = height - margin.top - margin.bottom;
@@ -53,7 +53,7 @@
         const group_key = 'Region2';
         popa = pop.filter( d => {
             return d[group_key ] != null && d[group_key] != "NA" })
-        //console.log(pop)
+
 
 
         pop.sort( (a,b) =>
@@ -69,26 +69,13 @@
 
 // Data and color scale
 
-        /*
         let colorScale = d3.scaleThreshold()
                 .domain([45,50,55,60,65,70,75,80])
                 .range(d3.schemeBlues[9]);
 
-
-
-        let colorScale = d3.scaleThreshold()
-                .domain([45,55,65,75,80])
-                .range(d3.schemeBlues[6]);
-*/
-
-        let lifeExtent = d3.extent(pop, d=>pop['2016']);
-        let colorScale = d3.scaleQuantize()
-                .domain([40,90])
-                .range(d3.schemeBlues[9]);
-
-
         svg.append("g")
             .attr("id", "map")
+            .attr("transform",`translate(${margin.left},${0})`)
             .selectAll("path")
             .data(geomap.features)
             .enter().append("path")
@@ -103,6 +90,23 @@
                     let r = d3.select(this);
                     console.log(r.attr("exp"));});
 
+
+
+        let legend = d3.legendColor()
+                .labels(d3.legendHelpers.thresholdLabels)
+                .labelFormat(d3.format("2"))
+            .title("Life Expectancy")
+            .titleWidth(300)
+                //.orient("vertical")
+                .orient("horizontal")
+            .scale(colorScale)
+                .shapePadding(10)
+                .shapeWidth(100)
+                .shapeHeight(30)
+
+        svg.append("g")
+                .attr("transform", `translate(${170}, ${margin.top})`)
+            .call(legend);
 
        // const color = d3.scaleQuantile([1, 10], d3.schemeBlues[9])
 
