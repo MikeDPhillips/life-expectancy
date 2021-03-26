@@ -12,11 +12,18 @@
     fill: darkblue;
 }
 
-.le_legend  .legendTitle{
+.le_legend .legendTitle{
     font-size: 1.8em;
-    font-family: Serif;
+    font-family: serif;
 
 }
 
-.le_legend  .legendCells{
+.div_legend .legendTitle{
+    font-size: 1.8em;
+    font-family: serif;
+
+}
+.le_legend .legendCells {
     font-size: 1.2em;
+}
+

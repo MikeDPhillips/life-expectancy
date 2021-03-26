@@ -5,27 +5,31 @@
 <head>
     <title>Project 1: Life Expectancy</title>
     <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="d3-geo-projection.v2.min.js"></script>
+    <script src="d3-legend.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-<!--    <style>
-        .xAxis .tick text {
-            font-size: 28px;
-            text-anchor: middle;
-        }
-    </style>-->
+    <!--    <style>
+            .xAxis .tick text {
+                font-size: 28px;
+                text-anchor: middle;
+            }
+        </style>-->
 </head>
 
 <body>
 
 <div id="main_header">
-<h2> Life Expectancy</h2>
+    <h2> Life Expectancy from Birth 1960</h2>
 </div>
 
 <div class="header" id="g1_header">
-<svg id="g1">
-</svg>
+    <svg id="g1">
+    </svg>
 </div>
 
 <script>
+
+
     let margin = {top:20,right:20,bottom:120,left:60},
             width = 1400,
             height = 1200,
@@ -33,116 +37,252 @@
             chartHeight = height - margin.top - margin.bottom;
 
     let svg = d3.select("#g1")
-        .attr("width", width)
-        .attr("height", height)
-
-    let annotations = svg.append("g").attr("id","annotations");
-    let chartArea = svg.append("g").attr("id","points")
-            .attr("transform",`translate(${margin.left},${margin.top})`);
-
-    d3.csv("countrydata.csv", d3.autoType).then((data) => {
-        console.log(data[0]);
-        console.log(data[0]['2016']);
-
-        console.log(data.length)
-
-        const group_key = 'Region2';
-        data = data.filter( d => {
-            return d[group_key ] != null && d[group_key] != "NA" })
-        console.log(data.length)
+            .attr("width", width)
+            .attr("height", height)
 
 
-        data.sort( (a,b) =>
-                d3.descending(a[group_key ],b[group_key ]) ||
-                d3.ascending(a['2016'], b['2016']));
+
+    Promise.all( [
+        d3.csv('simplified.csv', d3.autoType),
+        d3.json('world-110m.geojson')
+    ])
+            .then(([pop, geomap]) => {
 
 
-        // X axis
-         let xScale = d3.scaleBand()
-                 .domain(d3.map(data, d => d.Country))
-                 .range([0, chartWidth])
-                 .padding(0.00)
-                 .paddingOuter(0.5);
-
-        let groups = d3.map(data, d => d[group_key ]);
-        console.log(groups);
-        let xGroups = d3.scaleBand()
-            .domain(groups)
-            .range([0, chartWidth])
-
-       let bottomAxis = d3.axisBottom(xGroups);
-       annotations.append("g")
-               .attr("class", "xAxis")
-               .attr("transform",`translate(${margin.left},${chartHeight+margin.top})`)
-               .call(bottomAxis)
-               .selectAll("text")
-               .attr("id", "xText")
-               .attr("transform", "translate(0,20)rotate(10)")
-               //.style("text-anchor", "end")
+                const y = "1960"
+                // Map and projection
+                let path = d3.geoPath();
+                let projection = d3.geoNaturalEarth2()
+                        .scale(chartWidth / 1.4 / Math.PI)
+                        .translate([chartWidth / 2, chartHeight / 2]);
 
 
-       // Y Axis
-        let yScale = d3.scaleLinear()
-            .domain([40, 90])
-            .range([chartHeight, 0]);
-        let leftAxis = d3.axisLeft(yScale).ticks(10);
-        let leftGridLines = d3.axisLeft(yScale).ticks(10)
-                .tickSize(-chartWidth).tickFormat("");
-
-        annotations.append("g")
-            .attr("class", "yAxis")
-            .attr("transform",`translate(${margin.left},${margin.top})`)
-            .call(leftAxis)
-            //.selectAll("text")
-            // .attr("transform", "translate(-10,0)rotate(-45)")
-            // .style("text-anchor", "end")
-            // .style("font-size", 8);
-
-        annotations.append("g")
-            .attr("class", "gridlines")
-            .attr("transform","translate("+(margin.left)+","+(margin.top)+")")
-            .raise()
-            .call(leftGridLines);
+                let colorScale = d3.scaleThreshold()
+                        .domain([45,50,55,60,65,70,75,80])
+                        .range(d3.schemeBlues[9]);
 
 
-        //Color scale
-        const fillScale = d3.scaleOrdinal(d3.schemeSet2)
-                .domain(d3.map(data, d => d[group_key]))
+                svg.append("g")
+                        .attr("id", "map")
+                        .selectAll("path")
+                        .data(geomap.features)
+                        .enter().append("path")
+                        .attr("stroke", "#fff")
+                        .attr("d", path .projection(projection))
+                        .attr("fill", d => {
+                            d.final =  getLifeExp(pop, d.id, y) || 0;
+                            return colorScale(d.final);
+                        })
+                        .attr("exp", d => d.final)
+                        .on("mouseover", function () {
+                            let r = d3.select(this);
+                            console.log(r.attr("exp"));});
 
-        //Add bars
-        chartArea.selectAll("rect.bar").data(data)
-            .join(enter => {
-                console.log(d => {
-                    if(d['2016'] !== d['2016'])
-                        return(0);
-                    else
-                        return(d['2016']);
-            })
-            enter.append("rect")
-                .attr("class", "bar")
-                    .attr("region", d => d[group_key])
-                .attr("x", d => xScale(d.Country) )
-                .attr("y", d => yScale(d['2016']))
-                .attr("width", xScale.bandwidth())
-                .attr("height", d => {
-                    if(d['2016'] !== d['2016'])
-                        return(yScale(0));
-                    else
-                        return(chartHeight - yScale(d['2016']));
-                })
-                .attr("fill", d => fillScale(d[group_key]))
-                .on("mouseover", function () {
-                    let r = d3.select(this);
-                    console.log(r.attr("region"));});
-            },
 
-            exit => {
-                exit.remove();
-            }
-            );
+                let legend = d3.legendColor()
+                        .labels(d3.legendHelpers.thresholdLabels)
+                        .labelFormat(d3.format("2"))
+                        .title("Age (in years)")
+                        .titleWidth(300)
+                        //.orient("vertical")
+                        .orient("horizontal")
+                        .scale(colorScale)
+                        .shapePadding(10)
+                        .shapeWidth(100)
+                        .shapeHeight(30)
 
+                svg.append("g")
+                        .attr("transform", `translate(${170}, ${margin.top})`)
+                        .attr("class", "le_legend")
+                        .call(legend);
+
+            });
+
+    function getLifeExp(data, id, year) {
+        let val = data.filter( d => d.Code === id);
+        if(val.length == 0) return null;
+        return val[0][year];
+    }
+
+</script>
+
+<div class="header" id="g2_header">
+    <h2>Life Expectancy from Birth 2016 </h2>
+    <svg id="g2">
+    </svg>
+</div>
+
+<script>
+
+
+    Promise.all( [
+        d3.csv('countrydata.csv', d3.autoType),
+        d3.json('world-110m.geojson')
+    ])
+            .then(([pop, geomap]) => {
+
+
+                let svg = d3.select("#g2")
+                        .attr("width", width)
+                        .attr("height", height)
+                const group_key = 'Region2';
+                pop = pop.filter( d => {
+                    return d[group_key ] != null && d[group_key] != "NA" })
+
+
+
+                pop.sort( (a,b) =>
+                        d3.descending(a[group_key ],b[group_key ]) ||
+                        d3.ascending(a['2016'], b['2016']));
+
+
+                // Map and projection
+                let path = d3.geoPath();
+                let projection = d3.geoNaturalEarth2()
+                        .scale(chartWidth / 1.4 / Math.PI)
+                        .translate([chartWidth / 2, chartHeight / 2]);
+
+// Data and color scale
+                let colorScale = d3.scaleThreshold()
+                        .domain([45,50,55,60,65,70,75,80])
+                        .range(d3.schemeBlues[9]);
+
+                svg.append("g")
+                        .attr("id", "map")
+                        //.attr("transform",`translate(${margin.left},${0})`)
+                        .selectAll("path")
+                        .data(geomap.features)
+                        .enter().append("path")
+                        .attr("stroke", "#fff")
+                        .attr("d", path .projection(projection))
+                        .attr("fill", d => {
+                            d.final =  getLifeExp(pop, d.id, '2016') || 0;
+                            return colorScale(d.final);
+                        })
+                        .attr("exp", d => d.final)
+                        .on("mouseover", function () {
+                            let r = d3.select(this);
+                            console.log(r.attr("exp"));});
+
+
+
+                let legend = d3.legendColor()
+                        .labels(d3.legendHelpers.thresholdLabels)
+                        .labelFormat(d3.format("2"))
+                        .title("Age (in years)")
+                        .titleWidth(300)
+                        //.orient("vertical")
+                        .orient("horizontal")
+                        .scale(colorScale)
+                        .shapePadding(10)
+                        .shapeWidth(100)
+                        .shapeHeight(30)
+
+                svg.append("g")
+                        .attr("transform", `translate(${170}, ${margin.top})`)
+                        .attr("class", "le_legend")
+                        .call(legend);
+            });
+
+    function getLifeExp(data, id, year) {
+        let val = data.filter( d => d.Code === id);
+        if(val.length == 0) return null;
+        return val[0][year];
+    }
+
+</script>
+
+<div class="header" id="g3_header">
+    <h2>Rate of change in life expectancy after outbreak of HIV epidemic.</h2>
+    <svg id="g3">
+    </svg>
+</div>
+
+<script>
+
+    Promise.all( [
+        d3.csv('simplified.csv', d3.autoType),
+        d3.json('world-110m.geojson')
+    ])
+            .then(([pop, geomap]) => {
+                let margin = {top:20,right:20,bottom:120,left:60},
+                        width = 1400,
+                        height = 1200,
+                        chartWidth = width - margin.left - margin.right,
+                        chartHeight = height - margin.top - margin.bottom;
+
+                let svg = d3.select("#g3")
+                        .attr("width", width)
+                        .attr("height", height)
+
+                // Map and projection
+                let path = d3.geoPath();
+                let projection = d3.geoNaturalEarth2()
+                        .scale(chartWidth / 1.4 / Math.PI)
+                        .translate([chartWidth / 2, chartHeight / 2]);
+
+
+
+                const y = 'aidsEffect';
+                let lifeExtent = d3.extent(pop, d=>d[y]);
+
+                let divScale = d3.scaleDiverging(
+                        [lifeExtent[0], 0, lifeExtent[1]], d3.interpolateRdBu);
+
+                let colorScale = d3.scaleThreshold()
+                        .domain([-75,-50, -25, 0, 25,50,75])
+                        .range(d3.schemeBlues[9]);
+
+
+                svg.append("g")
+                        .attr("id", "map")
+                        .selectAll("path")
+                        .data(geomap.features)
+                        .enter().append("path")
+                        .attr("stroke", "#fff")
+                        .attr("d", path .projection(projection))
+                        .attr("fill", d => {
+                            d.final =  getLifeExp(pop, d.id, y) || 0;
+                            return divScale(d.final);
+                        })
+                        .attr("exp", d => d.final)
+                        .on("mouseover", function () {
+                            let r = d3.select(this);
+                            console.log(r.attr("exp"));});
+
+    let legend = d3.legendColor()
+            //.labels(d3.legendHelpers.thresholdLabels)
+            .labelFormat(d3.format(".2f"))
+            .title("Age (in years)")
+            .titleWidth(300)
+            //.orient("vertical")
+            .orient("horizontal")
+            .scale(divScale)
+            .cells(7)
+            .labels(["-100%", "-75%", "-25%", "0", "25%", "75%", "100%"])
+            .shapePadding(10)
+            .shapeWidth(100)
+            .shapeHeight(30)
+
+    svg.append("g")
+            .attr("transform", `translate(${170}, ${margin.top})`)
+            .attr("class", "div_legend")
+            .call(legend);
+
+    //svg.selectAll(".cell .label").text("100");
+    svg.selectAll(".cell").each( (d, i) => {
 
     })
+
+            });
+
+    d3.select("body").selectAll("input")
+
+    function getLifeExp(data, id, year) {
+        let val = data.filter( d => d.Code === id);
+        if(val.length == 0) return null;
+        return val[0][year];
+    }
 
 </script>
 
