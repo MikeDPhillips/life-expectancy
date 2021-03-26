@@ -50,7 +50,9 @@
             d3.json('world-110m.geojson')
     ])
     .then(([pop, geomap]) => {
-        console.log(pop[0]);
+
+
+        const y = "1960"
         // Map and projection
         let path = d3.geoPath();
         let projection = d3.geoNaturalEarth2()
@@ -58,25 +60,8 @@
                 .translate([chartWidth / 2, chartHeight / 2]);
 
 
-// Data and color scale
-
-        /*
         let colorScale = d3.scaleThreshold()
                 .domain([45,50,55,60,65,70,75,80])
-                .range(d3.schemeBlues[9]);
-
-
-
-        let colorScale = d3.scaleThreshold()
-                .domain([45,55,65,75,80])
-                .range(d3.schemeBlues[6]);
-*/
-
-        const y = 'oldest';
-        let lifeExtent = d3.extent(pop, d=>d[y]);
-        console.log(lifeExtent);
-        let colorScale = d3.scaleQuantize()
-                .domain([30,90])
                 .range(d3.schemeBlues[9]);
 
 
@@ -97,6 +82,22 @@
                     console.log(r.attr("exp"));});
 
 
+        let legend = d3.legendColor()
+                .labels(d3.legendHelpers.thresholdLabels)
+                .labelFormat(d3.format("2"))
+                .title("Age (in years)")
+                .titleWidth(300)
+                //.orient("vertical")
+                .orient("horizontal")
+                .scale(colorScale)
+                .shapePadding(10)
+                .shapeWidth(100)
+                .shapeHeight(30)
+
+        svg.append("g")
+                .attr("transform", `translate(${170}, ${margin.top})`)
+                .attr("class", "le_legend")
+                .call(legend);
 
     });
 

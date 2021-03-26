@@ -11,3 +11,12 @@
     font-size: 22px;
     fill: darkblue;
 }
+
+.le_legend  .legendTitle{
+    font-size: 1.8em;
+    font-family: Serif;
+
+}
+
+.le_legend  .legendCells{
+    font-size: 1.2em;
