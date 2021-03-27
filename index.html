@@ -8,21 +8,21 @@
     <script src="d3-geo-projection.v2.min.js"></script>
     <script src="d3-legend.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen"/>
-    <!--    <style>
-            .xAxis .tick text {
-                font-size: 28px;
-                text-anchor: middle;
-            }
-        </style>-->
 </head>
 
 <body>
 
 <div id="main_header">
-    <h2> Life Expectancy from Birth 1960</h2>
+    <h2>Worldwide trends in life expectancy 1960-2018</h2>
+    <h3>CS 3300 Project 1</h3>
+    <p> Mike Phillips, Aion Ashby, and Nikolas Lillios </p>
 </div>
 
-<div class="header" id="g1_header">
+<div class="header">
+    Worldwide life expectancy from birth in 1960.
+</div>
+
+<div id="g1_header">
     <svg id="g1">
     </svg>
 </div>
@@ -30,9 +30,9 @@
 <script>
 
 
-    let margin = {top:20,right:20,bottom:120,left:60},
-            width = 1400,
-            height = 1200,
+    let margin = {top:10,right:20,bottom:10,left:60},
+            width = 1200,
+            height = 1000,
             chartWidth = width - margin.left - margin.right,
             chartHeight = height - margin.top - margin.bottom;
 
@@ -82,17 +82,17 @@
                 let legend = d3.legendColor()
                         .labels(d3.legendHelpers.thresholdLabels)
                         .labelFormat(d3.format("2"))
-                        .title("Age (in years)")
-                        .titleWidth(300)
+                        .title("")
+                        //.titleWidth(300)
                         //.orient("vertical")
                         .orient("horizontal")
                         .scale(colorScale)
                         .shapePadding(10)
-                        .shapeWidth(100)
+                        .shapeWidth(80)
                         .shapeHeight(30)
 
                 svg.append("g")
-                        .attr("transform", `translate(${170}, ${margin.top})`)
+                        .attr("transform", `translate(${100}, ${margin.top})`)
                         .attr("class", "le_legend")
                         .call(legend);
 
@@ -105,15 +105,22 @@
     }
 
 </script>
+<div class="transition">
+In 1960, the global north is well ahead of the global south in terms of
+    life expectancy. But as we move to 2016, we can see many of those light
+    blue countries begin to darken as their life expectancy greatly increases.
+</div>
 
-<div class="header" id="g2_header">
-    <h2>Life Expectancy from Birth 2016 </h2>
+<div class="header">
+    Worldwide life expectancy from birth in 2016.
+</div>
+
+<div id="g2_header">
     <svg id="g2">
     </svg>
 </div>
 
 <script>
-
 
     Promise.all( [
         d3.csv('countrydata.csv', d3.autoType),
@@ -121,6 +128,8 @@
     ])
             .then(([pop, geomap]) => {
 
+              let  width = 1200,
+                        height = 1000;
 
                 let svg = d3.select("#g2")
                         .attr("width", width)
@@ -169,8 +178,6 @@
                 let legend = d3.legendColor()
                         .labels(d3.legendHelpers.thresholdLabels)
                         .labelFormat(d3.format("2"))
-                        .title("Age (in years)")
-                        .titleWidth(300)
                         //.orient("vertical")
                         .orient("horizontal")
                         .scale(colorScale)
@@ -179,7 +186,7 @@
                         .shapeHeight(30)
 
                 svg.append("g")
-                        .attr("transform", `translate(${170}, ${margin.top})`)
+                        .attr("transform", `translate(${100}, ${margin.top})`)
                         .attr("class", "le_legend")
                         .call(legend);
             });
@@ -192,8 +199,20 @@
 
 </script>
 
-<div class="header" id="g3_header">
-    <h2>Rate of change in life expectancy after outbreak of HIV epidemic.</h2>
+
+<div class="transition">
+    Great leaps were made in life expectancy since 1960. But, many regions have still not
+    caught up to the leaders. Is there a reason for this? Let's look at the mid 1980's to mid 2000's:
+    the height of the AIDS epidemic
+    around the world. Was the disease impactful enough to lower the growth rate of life expectancy?
+</div>
+
+
+<div class="header" id="hiv_header">
+    Percent change in life expectancy after outbreak of HIV epidemic.
+</div>
+
+<div id="g3_header">
     <svg id="g3">
     </svg>
 </div>
@@ -205,9 +224,9 @@
         d3.json('world-110m.geojson')
     ])
             .then(([pop, geomap]) => {
-                let margin = {top:20,right:20,bottom:120,left:60},
-                        width = 1400,
-                        height = 1200,
+                let margin = {top:20,right:20,bottom:10,left:60},
+                        width = 1200,
+                        height = 1000,
                         chartWidth = width - margin.left - margin.right,
                         chartHeight = height - margin.top - margin.bottom;
 
@@ -253,8 +272,6 @@
     let legend = d3.legendColor()
             //.labels(d3.legendHelpers.thresholdLabels)
             .labelFormat(d3.format(".2f"))
-            .title("Age (in years)")
-            .titleWidth(300)
             //.orient("vertical")
             .orient("horizontal")
             .scale(divScale)
@@ -265,7 +282,7 @@
             .shapeHeight(30)
 
     svg.append("g")
-            .attr("transform", `translate(${170}, ${margin.top})`)
+            .attr("transform", `translate(${100}, ${margin.top})`)
             .attr("class", "div_legend")
             .call(legend);
 
@@ -286,6 +303,17 @@
 
 </script>
 
+<div class="transition">
+    The onset of the AIDS epidemic was disastrous for many countries, particularly
+    those in Sub-Saharan Africa. Luckily this trend has started reversing since 2005,
+    so maybe the worst impact of the epidemic is over and these countries will look
+    forward to large increases in the coming years.
+</div>
+
+<div class="footer">
+    Data courtesy of <a href="https://data.worldbank.org/indicator/SP.DYN.LE00.IN?view=chart">
+    World Bank</a>.
+</div>
 
 </body>
 </html>
