@@ -1,21 +1,9 @@
-<a href="https://github.com/MikeDPhillips/info3300_proj1/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=MikeDPhillips/info3300_proj1" />
-</a>
-
-[![Mike's GitHub stats](https://github-readme-stats.vercel.app/api?username=mikedphillips)](https://github.com/mikedphillips/github-readme-stats)
-
-
 
 # Visualizing world-wide life expectancy data.
 
-The goal of this project is to effectively visualize data regarding life expectancy trends.
-The project is an assignment for Cornell's INFO 5100 Spring 2021 course. It uses
-the javascript [D3 library](https://github.com/d3/d3). Preliminary data exploration
+The goal of this project is to effectively visualize data regarding life expectancy trends, particularly the dramatic change in life expectancy that has occurred since the onset of the AIDS epidemic in the 1980's. Preliminary data analysis finding this effect can be found [here]()
+ It uses the javascript [D3 library](https://github.com/d3/d3). Preliminary data exploration
 and cleaning was done in R.
-
-
-
-
 
 ## Datasets
 
